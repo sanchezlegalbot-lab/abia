@@ -1,0 +1,538 @@
+import { useState, useEffect } from "react";
+
+const BLUE = "#2035d4";
+const ORANGE = "#e85c2b";
+
+const USUARIOS = [
+  { usuario: "aaaguad",    clave: "ABI2025!", nombre: "Alejandra Aguad" },
+  { usuario: "fbanados",   clave: "ABI2025!", nombre: "Francisco Bañados" },
+  { usuario: "eizquierdo", clave: "ABI2025!", nombre: "Eduardo Izquierdo" },
+  { usuario: "jmeza",      clave: "ABI2025!", nombre: "José Joaquín Meza" },
+  { usuario: "admin",      clave: "ABI2025!", nombre: "Administrador" },
+];
+
+const SECTIONS = {
+  herramientas: {
+    label: "Herramientas",
+    areas: [
+      {
+        id: "negocios", title: "Negocios", color: BLUE,
+        items: [
+          {
+            id: "corporativo", name: "Corporativo y M&A", description: "Constitución de sociedades, reformas estatutarias, pactos de accionistas, gobierno corporativo y operaciones de M&A.",
+            sub: [
+              { id: "corp-contratos", name: "Contratos", url: "#", children: [
+                { id: "c-general", name: "General", url: "#" },
+                { id: "c-compraventa-acc", name: "Compraventa de Acciones", url: "#" },
+                { id: "c-arrendamiento", name: "Arrendamiento", url: "#" },
+                { id: "c-concesion", name: "Concesión", url: "#" },
+                { id: "c-suministro", name: "Suministro", url: "#" },
+                { id: "c-servicios", name: "Prestación de Servicios", url: "#" },
+                { id: "c-promesa", name: "Promesa de Compraventa", url: "#" },
+                { id: "c-pactos", name: "Pactos de Accionistas", url: "#" },
+                { id: "c-aumento", name: "Aumento de K", url: "#" },
+                { id: "c-disminucion", name: "Disminución de K", url: "#" },
+              ]},
+              { id: "normativa", name: "Normativa Comercial - Societaria", url: "#", children: [] },
+              { id: "due-diligence", name: "Due Diligence", url: "#", children: [] },
+            ],
+          },
+          {
+            id: "inmobiliario", name: "Inmobiliario y Urbanístico", description: "Due diligence, compraventas, promesas, arriendos, copropiedad y normativa urbanística.",
+            sub: [
+              { id: "inm-financiamiento", name: "Contrato de Financiamiento Inmobiliario", url: "#", children: [] },
+              { id: "inm-normativa", name: "Normativa", url: "#", children: [] },
+            ],
+          },
+          {
+            id: "construccion", name: "Infraestructura y Construcción", description: "Contratos EPC/EPCM, licitaciones, project finance y gerencia de proyectos.",
+            sub: [
+              { id: "const-contrato", name: "Contrato de Construcción", url: "#", children: [] },
+            ],
+          },
+          {
+            id: "laboral", name: "Laboral", description: "Asesoría en relaciones laborales, contratos, cumplimiento normativo y estrategia laboral.",
+            sub: [
+              { id: "lab-contrato", name: "Contrato Laboral", url: "#", children: [] },
+              { id: "lab-cartas", name: "Cartas", url: "#", children: [] },
+              { id: "lab-normativa", name: "Normativa", url: "#", children: [] },
+            ],
+          },
+          {
+            id: "compliance", name: "Compliance", description: "Diseño e implementación de programas de cumplimiento normativo.",
+            sub: [
+              { id: "comp-matrices", name: "Matrices de Riesgo", url: "#", children: [] },
+              { id: "comp-normativa", name: "Normativa", url: "#", children: [] },
+              { id: "comp-modelos", name: "Modelos de Prevención", url: "#", children: [] },
+            ],
+          },
+          { id: "patrimonial", name: "Gestión Patrimonial", description: "Planificación patrimonial, holdings, trusts y protocolos familiares.", sub: [] },
+          {
+            id: "regulaciones", name: "Regulaciones", description: "Asesoría en normativa sectorial, permisos y concesiones.",
+            sub: [
+              { id: "reg-datos", name: "Protección de Datos", url: "#", children: [] },
+              { id: "reg-ciber", name: "Ciberseguridad", url: "#", children: [] },
+              { id: "reg-consumidor", name: "Consumidor", url: "#", children: [] },
+              { id: "reg-competencia", name: "Libre Competencia", url: "#", children: [] },
+            ],
+          },
+        ],
+      },
+      {
+        id: "conflictos", title: "Resolución de Conflictos", color: ORANGE,
+        items: [
+          {
+            id: "arbitraje", name: "Arbitrajes", description: "Memoriales, análisis de laudos, jurisprudencia arbitral CAM Santiago y arbitraje internacional.",
+            sub: [
+              { id: "arb-jurisp", name: "Jurisprudencia Arbitral", url: "#", children: [] },
+              { id: "arb-quejas", name: "Jurisprudencia Quejas", url: "#", children: [] },
+              { id: "arb-prediccion", name: "Informe de Predicción de Controversia", url: "#", children: [] },
+              { id: "arb-demandas", name: "Redacción de Demandas", url: "#", children: [] },
+              { id: "arb-contestaciones", name: "Redacción de Contestaciones", url: "#", children: [] },
+              { id: "arb-reposicion", name: "Reposición Auto de Prueba", url: "#", children: [] },
+              { id: "arb-revision", name: "Agente de Revisión de Prueba", url: "#", children: [] },
+              { id: "arb-observaciones", name: "Redacción Observaciones a la Prueba", url: "#", children: [] },
+              { id: "arb-reglamento", name: "Reglamento CAM", url: "#", children: [] },
+              { id: "arb-laci", name: "LACI", url: "#", children: [] },
+            ],
+          },
+          { id: "expedientes", name: "Expedientes Inteligentes", description: "Análisis, organización y gestión inteligente de expedientes judiciales y arbitrales.", sub: [] },
+          {
+            id: "litigios-cc", name: "Litigios Civiles y Comerciales", description: "Demandas, contestaciones y escritos en procedimientos de alta complejidad.",
+            sub: [
+              { id: "lit-demandas", name: "Demandas", url: "#", children: [
+                { id: "d-pauliana", name: "Acción Pauliana", url: "#" },
+                { id: "d-prescripcion", name: "Declaración de Prescripción", url: "#" },
+                { id: "d-indemnizatoria-c", name: "Indemnizatoria Contractual", url: "#" },
+                { id: "d-indemnizatoria-e", name: "Indemnizatoria Extracontractual", url: "#" },
+                { id: "d-resolutoria", name: "Acción Resolutoria", url: "#" },
+                { id: "d-inremverso", name: "Acción In Rem Verso", url: "#" },
+                { id: "d-reivindicatoria", name: "Acción Reivindicatoria", url: "#" },
+              ]},
+              { id: "lit-contestaciones", name: "Contestaciones", url: "#", children: [
+                { id: "c-contractual", name: "Contestación Resp. Contractual", url: "#" },
+                { id: "c-extracontractual", name: "Contestación Resp. Extracontractual", url: "#" },
+              ]},
+              { id: "lit-escritos", name: "Escritos Trámite", url: "#", children: [] },
+              { id: "lit-dilatorias", name: "Excepciones Dilatorias", url: "https://claude.ai/project/019d2499-27c7-73fc-9bc2-4e3420d849ad", children: [] },
+              { id: "lit-traslado", name: "Evacúa Traslado Dilatorias", url: "#", children: [] },
+              { id: "lit-incidentes", name: "Incidentes", url: "#", children: [] },
+              { id: "lit-observaciones", name: "Observaciones a la Prueba", url: "#", children: [] },
+              { id: "lit-pliego", name: "Pliego de Posiciones", url: "#", children: [] },
+              { id: "lit-casacion", name: "Recurso de Casación", url: "#", children: [
+                { id: "cas-forma", name: "Casación Forma", url: "#" },
+                { id: "cas-fondo", name: "Casación Fondo", url: "#" },
+              ]},
+              { id: "lit-prejudiciales", name: "Prejudiciales", url: "#", children: [] },
+              { id: "lit-transaccion", name: "Transacción", url: "#", children: [] },
+              { id: "lit-normativa", name: "Normativa Procesal Civil", url: "#", children: [] },
+              { id: "lit-apelacion", name: "Recurso de Apelación", url: "#", children: [] },
+              { id: "lit-hecho", name: "Recurso de Hecho", url: "#", children: [] },
+            ],
+          },
+          {
+            id: "insolvencia", name: "Insolvencia y Reestructuración", description: "Reorganización y liquidación de empresas bajo la Ley de Insolvencia.",
+            sub: [
+              { id: "ins-verificacion", name: "Verificación de Crédito", url: "#", children: [] },
+              { id: "ins-normativa", name: "Normativa", url: "#", children: [] },
+            ],
+          },
+          {
+            id: "litigios-lab", name: "Litigios Laborales", description: "Representación en juicios del trabajo y tutela de derechos fundamentales.",
+            sub: [
+              { id: "lab-contestaciones", name: "Contestaciones", url: "#", children: [] },
+              { id: "lab-observaciones", name: "Observaciones a la Prueba", url: "#", children: [] },
+              { id: "lab-nulidad", name: "Recurso de Nulidad", url: "#", children: [] },
+              { id: "lab-normativa-p", name: "Normativa Laboral-Procesal", url: "#", children: [] },
+            ],
+          },
+          { id: "litigios-adm", name: "Litigios Administrativos", description: "Reclamaciones ante organismos públicos y litigios contencioso-administrativos.", sub: [] },
+          { id: "litigios-cons", name: "Litigios de Consumidor", description: "Defensa ante el SERNAC y tribunales en materia de consumo.", sub: [] },
+          { id: "litigios-constr", name: "Litigios de Construcción", description: "Controversias de contratos de construcción y vicios constructivos.", sub: [] },
+          { id: "cobranza", name: "Cobranza", description: "Gestión y seguimiento de procesos de cobranza judicial y extrajudicial.", sub: [] },
+        ],
+      },
+    ],
+  },
+  conocimiento: {
+    label: "Conocimiento",
+    areas: [
+      {
+        id: "jurisprudencia", title: "Jurisprudencia", color: "#7c3aed",
+        items: [
+          { id: "cam", name: "Observatorio Arbitral CAM Santiago", description: "Fichas de jurisprudencia arbitral sistematizadas.", sub: [] },
+          { id: "civil", name: "Jurisprudencia Civil", description: "Seguimiento y análisis de fallos en materia civil.", sub: [] },
+          { id: "laboral-j", name: "Jurisprudencia Laboral", description: "Sentencias y tendencias en materia laboral.", sub: [] },
+        ],
+      },
+      {
+        id: "doctrina", title: "Doctrina y Normativa", color: "#0369a1",
+        items: [
+          { id: "doctrina-civil", name: "Doctrina Civil", description: "Análisis en obligaciones, contratos y responsabilidad civil.", sub: [] },
+          { id: "doctrina-arb", name: "Doctrina Arbitral", description: "Publicaciones en arbitraje nacional e internacional.", sub: [] },
+          { id: "normativa-v", name: "Normativa Vigente", description: "Acceso y análisis de normativa relevante.", sub: [] },
+          { id: "circulares", name: "Circulares y Dictámenes", description: "Seguimiento de circulares y dictámenes de organismos públicos.", sub: [] },
+        ],
+      },
+    ],
+  },
+  rrhh: {
+    label: "ABI RRHH",
+    areas: [
+      {
+        id: "personas", title: "Gestión de Personas", color: "#059669",
+        items: [
+          { id: "contratos-rrhh", name: "Contratos y Onboarding", description: "Contratos de trabajo, anexos y proceso de incorporación.", sub: [] },
+          { id: "politicas", name: "Políticas Internas", description: "Reglamentos y procedimientos internos del estudio.", sub: [] },
+          { id: "evaluacion", name: "Evaluación de Desempeño", description: "Criterios, formularios y reportes de evaluación.", sub: [] },
+          { id: "beneficios", name: "Beneficios y Remuneraciones", description: "Paquetes de beneficios y política remuneracional.", sub: [] },
+        ],
+      },
+      {
+        id: "cultura", title: "Cultura y Desarrollo", color: "#0d9488",
+        items: [
+          { id: "formacion", name: "Formación y Capacitación", description: "Programas de formación para el equipo.", sub: [] },
+          { id: "clima", name: "Clima Organizacional", description: "Iniciativas para el bienestar y cohesión del equipo.", sub: [] },
+          { id: "diversity", name: "Diversidad e Inclusión", description: "Políticas y métricas de diversidad e inclusión.", sub: [] },
+        ],
+      },
+    ],
+  },
+  mgmt: {
+    label: "Management & MKT",
+    areas: [
+      {
+        id: "gestion", title: "Gestión del Estudio", color: "#b45309",
+        items: [
+          { id: "honorarios", name: "Propuestas de Honorarios", description: "Estructuración de propuestas de honorarios profesionales.", sub: [] },
+          { id: "casos", name: "Gestión de Casos", description: "Seguimiento de plazos, tareas y estado de asuntos.", sub: [] },
+          { id: "reportes", name: "Reportes de Gestión", description: "Informes de actividad, rentabilidad y métricas.", sub: [] },
+          { id: "presupuesto", name: "Presupuesto y Costos", description: "Control presupuestario y proyecciones financieras.", sub: [] },
+        ],
+      },
+      {
+        id: "marketing", title: "Marketing y Posicionamiento", color: "#d946ef",
+        items: [
+          { id: "contenido", name: "Contenido", description: "Columnas, newsletters y publicaciones para redes.", sub: [] },
+          { id: "pitches", name: "Pitches y Presentaciones", description: "Presentaciones comerciales y materiales para clientes.", sub: [] },
+          { id: "ranking", name: "Rankings y Directorios", description: "Postulaciones a rankings legales nacionales e internacionales.", sub: [] },
+          { id: "marca", name: "Marca y Comunicación", description: "Lineamientos de marca y comunicación institucional.", sub: [] },
+        ],
+      },
+    ],
+  },
+};
+
+function Curvas({ opacity = 0.3 }) {
+  return (
+    <svg viewBox="0 0 300 200" fill="none"
+      style={{ position: "absolute", right: 0, top: 0, width: "50%", height: "100%", opacity, pointerEvents: "none" }}>
+      <path d="M290,0 Q240,50 265,100 Q290,155 240,200"  stroke="white" strokeWidth="2.2" fill="none"/>
+      <path d="M265,-15 Q210,42 238,98 Q265,152 212,200" stroke="white" strokeWidth="2.2" fill="none"/>
+      <path d="M240,-28 Q180,36 212,96 Q240,152 185,200" stroke="white" strokeWidth="2.2" fill="none"/>
+      <path d="M215,-40 Q150,30 185,94 Q215,152 157,200" stroke="white" strokeWidth="2.2" fill="none"/>
+      <path d="M190,-50 Q120,24 158,92 Q190,152 130,200" stroke="white" strokeWidth="2.2" fill="none"/>
+    </svg>
+  );
+}
+
+function LogoABI() {
+  return (
+    <svg height="52" viewBox="0 0 260 80" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="58" fontFamily="DM Sans,sans-serif" fontWeight="300" fontSize="30" fill="white" letterSpacing="1">ab</text>
+      <text x="44" y="64" fontFamily="DM Sans,sans-serif" fontWeight="700" fontSize="58" fill="white" letterSpacing="-2">IA</text>
+      <line x1="118" y1="14" x2="118" y2="66" stroke="rgba(255,255,255,0.45)" strokeWidth="1.5"/>
+      <text x="126" y="30" fontFamily="DM Sans,sans-serif" fontWeight="400" fontSize="13" fill="white" letterSpacing="3.5">AGUAD</text>
+      <text x="126" y="46" fontFamily="DM Sans,sans-serif" fontWeight="400" fontSize="13" fill="white" letterSpacing="3.5">BAÑADOS</text>
+      <text x="126" y="62" fontFamily="DM Sans,sans-serif" fontWeight="400" fontSize="13" fill="white" letterSpacing="3.5">IZQUIERDO</text>
+      <text x="127" y="75" fontFamily="DM Sans,sans-serif" fontWeight="300" fontSize="9" fill="rgba(255,255,255,0.6)" letterSpacing="4">ABOGADOS</text>
+    </svg>
+  );
+}
+
+function AgentModal({ item, color, onClose }) {
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 4, width: "90%", maxWidth: 440, overflow: "hidden", boxShadow: "0 32px 80px rgba(0,0,0,0.25)" }}>
+        <div style={{ background: color, padding: "26px 30px 20px", position: "relative", overflow: "hidden" }}>
+          <Curvas opacity={0.22} />
+          <div style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", letterSpacing: 2.5, textTransform: "uppercase", marginBottom: 7, position: "relative", zIndex: 1 }}>Asistente especializado</div>
+          <div style={{ fontSize: 20, fontWeight: 500, color: "#fff", position: "relative", zIndex: 1 }}>{item.name}</div>
+          <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "rgba(255,255,255,0.2)", border: "none", borderRadius: "50%", width: 28, height: 28, color: "#fff", cursor: "pointer", fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2 }}>✕</button>
+        </div>
+        <div style={{ padding: "22px 30px 28px" }}>
+          <p style={{ margin: "0 0 22px", fontSize: 13.5, color: "#555", lineHeight: 1.75 }}>{item.description || "Asistente especializado para esta área."}</p>
+          <button
+            onClick={() => { if (!item.url || item.url === "#") alert("Configura la URL:\nhttps://claude.ai/project/xxxx"); else window.open(item.url, "_blank"); }}
+            style={{ width: "100%", padding: "12px", background: color, border: "none", borderRadius: 2, color: "#fff", fontSize: 13.5, fontWeight: 600, cursor: "pointer" }}>
+            Abrir asistente →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SubModal({ item, color, onClose }) {
+  const [childSelected, setChildSelected] = useState(null);
+  const [hov, setHov] = useState(null);
+  const list = item.children || [];
+  if (list.length === 0) return <AgentModal item={item} color={color} onClose={onClose} />;
+  return (
+    <>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 998, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 4, width: "90%", maxWidth: 440, overflow: "hidden", boxShadow: "0 32px 80px rgba(0,0,0,0.25)" }}>
+          <div style={{ background: color, padding: "24px 28px 18px", position: "relative", overflow: "hidden" }}>
+            <Curvas opacity={0.22} />
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", letterSpacing: 2.5, textTransform: "uppercase", marginBottom: 6, position: "relative", zIndex: 1 }}>Selecciona una opción</div>
+            <div style={{ fontSize: 19, fontWeight: 500, color: "#fff", position: "relative", zIndex: 1 }}>{item.name}</div>
+            <button onClick={onClose} style={{ position: "absolute", top: 14, right: 14, background: "rgba(255,255,255,0.2)", border: "none", borderRadius: "50%", width: 28, height: 28, color: "#fff", cursor: "pointer", fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2 }}>✕</button>
+          </div>
+          <div style={{ padding: "8px 0" }}>
+            {list.map((child, i) => (
+              <button key={child.id} onClick={() => setChildSelected(child)}
+                onMouseEnter={() => setHov(child.id)} onMouseLeave={() => setHov(null)}
+                style={{ width: "100%", background: hov === child.id ? color + "0f" : "transparent", border: "none", borderBottom: i < list.length - 1 ? "1px solid #f0f0ee" : "none", padding: "12px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", textAlign: "left" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: hov === child.id ? color : "#ddd", flexShrink: 0 }} />
+                  <span style={{ fontSize: 13.5, fontWeight: hov === child.id ? 600 : 400, color: hov === child.id ? color : "#333" }}>{child.name}</span>
+                </div>
+                <span style={{ color: hov === child.id ? color : "#ddd", fontSize: 16 }}>›</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      {childSelected && <AgentModal item={childSelected} color={color} onClose={() => setChildSelected(null)} />}
+    </>
+  );
+}
+
+function ItemModal({ item, color, onClose }) {
+  const [subSelected, setSubSelected] = useState(null);
+  const [hov, setHov] = useState(null);
+  const hasSub = item.sub && item.sub.length > 0;
+  if (!hasSub) return <AgentModal item={item} color={color} onClose={onClose} />;
+  return (
+    <>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 997, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 4, width: "90%", maxWidth: 440, overflow: "hidden", boxShadow: "0 32px 80px rgba(0,0,0,0.25)" }}>
+          <div style={{ background: color, padding: "24px 28px 18px", position: "relative", overflow: "hidden" }}>
+            <Curvas opacity={0.22} />
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", letterSpacing: 2.5, textTransform: "uppercase", marginBottom: 6, position: "relative", zIndex: 1 }}>Herramientas disponibles</div>
+            <div style={{ fontSize: 19, fontWeight: 500, color: "#fff", position: "relative", zIndex: 1 }}>{item.name}</div>
+            <button onClick={onClose} style={{ position: "absolute", top: 14, right: 14, background: "rgba(255,255,255,0.2)", border: "none", borderRadius: "50%", width: 28, height: 28, color: "#fff", cursor: "pointer", fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2 }}>✕</button>
+          </div>
+          <div style={{ padding: "8px 0" }}>
+            {item.sub.map((s, i) => (
+              <button key={s.id} onClick={() => setSubSelected(s)}
+                onMouseEnter={() => setHov(s.id)} onMouseLeave={() => setHov(null)}
+                style={{ width: "100%", background: hov === s.id ? color + "0f" : "transparent", border: "none", borderBottom: i < item.sub.length - 1 ? "1px solid #f0f0ee" : "none", padding: "13px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", textAlign: "left" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: hov === s.id ? color : "#ddd", flexShrink: 0 }} />
+                  <span style={{ fontSize: 13.5, fontWeight: hov === s.id ? 600 : 400, color: hov === s.id ? color : "#333" }}>{s.name}</span>
+                </div>
+                <span style={{ color: hov === s.id ? color : "#ddd", fontSize: 16 }}>›</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      {subSelected && <SubModal item={subSelected} color={color} onClose={() => setSubSelected(null)} />}
+    </>
+  );
+}
+
+function AreaBox({ area }) {
+  const [selected, setSelected] = useState(null);
+  const [hov, setHov] = useState(null);
+  return (
+    <>
+      <div style={{ flex: 1, minWidth: 280, background: "#fff", borderRadius: 3, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+        <div style={{ background: area.color, padding: "22px 26px 18px", position: "relative", overflow: "hidden" }}>
+          <Curvas opacity={0.32} />
+          <div style={{ fontSize: 10, color: "rgba(255,255,255,0.55)", letterSpacing: 3, textTransform: "uppercase", marginBottom: 5, position: "relative", zIndex: 1 }}>Área de práctica</div>
+          <div style={{ fontSize: 21, fontWeight: 400, color: "#fff", letterSpacing: -0.2, position: "relative", zIndex: 1 }}>{area.title}</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 3, position: "relative", zIndex: 1 }}>{area.items.length} asistentes disponibles</div>
+        </div>
+        <div>
+          {area.items.map((item, i) => (
+            <button key={item.id} onClick={() => setSelected(item)}
+              onMouseEnter={() => setHov(item.id)} onMouseLeave={() => setHov(null)}
+              style={{ width: "100%", background: hov === item.id ? area.color + "0f" : "transparent", border: "none", borderBottom: i < area.items.length - 1 ? "1px solid #f0f0ee" : "none", padding: "13px 26px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", textAlign: "left" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: hov === item.id ? area.color : "#ddd", flexShrink: 0 }} />
+                <span style={{ fontSize: 13.5, fontWeight: hov === item.id ? 600 : 400, color: hov === item.id ? area.color : "#333" }}>{item.name}</span>
+              </div>
+              <span style={{ color: hov === item.id ? area.color : "#ddd", fontSize: 16 }}>›</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      {selected && <ItemModal item={selected} color={area.color} onClose={() => setSelected(null)} />}
+    </>
+  );
+}
+
+function Login({ onLogin }) {
+  const [usuario, setUsuario] = useState("");
+  const [clave, setClave] = useState("");
+  const [error, setError] = useState("");
+  const [verClave, setVerClave] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = () => {
+    setError("");
+    setLoading(true);
+    setTimeout(() => {
+      const ok = USUARIOS.find(u => u.usuario === usuario.trim() && u.clave === clave);
+      if (ok) { onLogin(ok); }
+      else { setError("Usuario o contraseña incorrectos."); setLoading(false); }
+    }, 600);
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#f4f3f0", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "DM Sans, sans-serif" }}>
+      <div style={{ width: "100%", maxWidth: 420, padding: "0 16px" }}>
+        <div style={{ background: "#fff", borderRadius: 4, overflow: "hidden", boxShadow: "0 8px 40px rgba(0,0,0,0.10)" }}>
+          <div style={{ background: BLUE, padding: "36px 36px 28px", position: "relative", overflow: "hidden" }}>
+            <Curvas opacity={0.28} />
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <LogoABI />
+              <div style={{ marginTop: 18, fontSize: 13, color: "rgba(255,255,255,0.6)" }}>Tu asistente legal inteligente</div>
+            </div>
+            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, transparent, ${ORANGE})` }} />
+          </div>
+          <div style={{ padding: "32px 36px 36px" }}>
+            <div style={{ fontSize: 17, fontWeight: 600, color: "#111", marginBottom: 6 }}>Iniciar sesión</div>
+            <div style={{ fontSize: 13, color: "#999", marginBottom: 26 }}>Ingresa tus credenciales para continuar</div>
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, color: "#555", letterSpacing: 0.5, textTransform: "uppercase", display: "block", marginBottom: 6 }}>Usuario</label>
+              <input value={usuario} onChange={e => setUsuario(e.target.value)} onKeyDown={e => e.key === "Enter" && handleLogin()} placeholder="tu.usuario"
+                style={{ width: "100%", padding: "11px 14px", borderRadius: 2, border: `1.5px solid ${error ? "#ef4444" : "#e5e5e3"}`, fontSize: 14, outline: "none", boxSizing: "border-box", background: "#fafaf9" }}
+                onFocus={e => e.target.style.borderColor = BLUE} onBlur={e => e.target.style.borderColor = error ? "#ef4444" : "#e5e5e3"} />
+            </div>
+            <div style={{ marginBottom: 22 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, color: "#555", letterSpacing: 0.5, textTransform: "uppercase", display: "block", marginBottom: 6 }}>Contraseña</label>
+              <div style={{ position: "relative" }}>
+                <input type={verClave ? "text" : "password"} value={clave} onChange={e => setClave(e.target.value)} onKeyDown={e => e.key === "Enter" && handleLogin()} placeholder="••••••••"
+                  style={{ width: "100%", padding: "11px 40px 11px 14px", borderRadius: 2, border: `1.5px solid ${error ? "#ef4444" : "#e5e5e3"}`, fontSize: 14, outline: "none", boxSizing: "border-box", background: "#fafaf9" }}
+                  onFocus={e => e.target.style.borderColor = BLUE} onBlur={e => e.target.style.borderColor = error ? "#ef4444" : "#e5e5e3"} />
+                <button onClick={() => setVerClave(!verClave)} style={{ position: "absolute", right: 11, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#aaa", fontSize: 14 }}>
+                  {verClave ? "🙈" : "👁"}
+                </button>
+              </div>
+              {error && <div style={{ fontSize: 12, color: "#ef4444", marginTop: 5 }}>{error}</div>}
+            </div>
+            <button onClick={handleLogin} disabled={loading}
+              style={{ width: "100%", padding: "13px", background: loading ? "#8fa3f0" : BLUE, border: "none", borderRadius: 2, color: "#fff", fontSize: 14, fontWeight: 600, cursor: loading ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+              onMouseEnter={e => { if (!loading) e.currentTarget.style.background = "#1728b8"; }}
+              onMouseLeave={e => { if (!loading) e.currentTarget.style.background = BLUE; }}>
+              {loading ? "Verificando..." : "Ingresar →"}
+            </button>
+          </div>
+        </div>
+        <div style={{ textAlign: "center", marginTop: 16, fontSize: 11, color: "#bbb" }}>
+          Desarrollado por <strong style={{ color: "#aaa" }}>Tomás Sánchez E.</strong> · Claude by Anthropic
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Portal({ user, onLogout }) {
+  const [section, setSection] = useState("herramientas");
+  const [search, setSearch] = useState("");
+  const [time, setTime] = useState("");
+
+  useEffect(() => {
+    const upd = () => setTime(new Date().toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long", year: "numeric" }));
+    upd();
+    const iv = setInterval(upd, 60000);
+    return () => clearInterval(iv);
+  }, []);
+
+  const current = SECTIONS[section];
+  const filtered = search.trim()
+    ? current.areas.map(a => ({ ...a, items: a.items.filter(i => i.name.toLowerCase().includes(search.toLowerCase())) })).filter(a => a.items.length > 0)
+    : current.areas;
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#f4f3f0", fontFamily: "DM Sans, sans-serif" }}>
+      <div style={{ background: BLUE, boxShadow: "0 4px 20px rgba(32,53,212,0.35)", position: "sticky", top: 0, zIndex: 50 }}>
+        <div style={{ width: "100%", padding: "0 16px", height: 88, display: "flex", alignItems: "center", position: "relative", overflow: "hidden" }}>
+          <Curvas opacity={0.28} />
+          <div style={{ position: "relative", zIndex: 1 }}><LogoABI /></div>
+          <div style={{ flex: 1 }} />
+          <button onClick={() => alert("¿Necesitas ayuda?\n\nEscríbenos a contacto@abiabogados.cl")}
+            style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 2, color: "rgba(255,255,255,0.85)", fontSize: 11.5, cursor: "pointer", position: "relative", zIndex: 1, whiteSpace: "nowrap" }}
+            onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.22)"}
+            onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.12)"}>
+            ¿Necesitas ayuda?
+          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginLeft: 14, position: "relative", zIndex: 1 }}>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>{user.nombre}</div>
+            <button onClick={onLogout}
+              style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", background: "none", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 2, padding: "4px 8px", cursor: "pointer" }}
+              onMouseEnter={e => e.currentTarget.style.color = "#fff"}
+              onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.5)"}>
+              Salir
+            </button>
+          </div>
+        </div>
+        <div style={{ display: "flex", padding: "0 16px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+          {Object.entries(SECTIONS).map(([key, val]) => (
+            <button key={key} onClick={() => { setSection(key); setSearch(""); }}
+              style={{ padding: "11px 20px", background: "none", border: "none", borderBottom: section === key ? `3px solid ${ORANGE}` : "3px solid transparent", color: section === key ? "#fff" : "rgba(255,255,255,0.5)", fontSize: 12.5, fontWeight: section === key ? 600 : 400, cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap" }}>
+              {val.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ background: `linear-gradient(155deg, ${BLUE} 0%, #1630c8 100%)`, position: "relative", overflow: "hidden" }}>
+        <Curvas opacity={0.3} />
+        <div style={{ width: "100%", padding: "40px 16px 36px", position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: 2, textTransform: "uppercase", marginBottom: 10 }}>{time}</div>
+          <div style={{ fontSize: 36, fontWeight: 400, color: "#fff", lineHeight: 1.15, letterSpacing: -0.8, marginBottom: 14 }}>
+            <span style={{ fontWeight: 300, fontSize: 30 }}>ab</span><span style={{ fontWeight: 700, fontSize: 40 }}>IA</span>
+            {" — "}{current.label}
+          </div>
+          <div style={{ width: 44, height: 2.5, background: ORANGE, marginBottom: 16 }} />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 14 }}>
+            <p style={{ margin: 0, fontSize: 14, color: "rgba(255,255,255,0.65)", maxWidth: 500, lineHeight: 1.7, fontWeight: 300 }}>
+              {current.areas.reduce((s, a) => s + a.items.length, 0)} asistentes en {current.areas.length} áreas. Selecciona para comenzar.
+            </p>
+            <div style={{ position: "relative" }}>
+              <span style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.4)", fontSize: 13 }}>🔍</span>
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar asistente..."
+                style={{ width: 210, padding: "9px 14px 9px 32px", borderRadius: 2, border: "1px solid rgba(255,255,255,0.2)", fontSize: 13, outline: "none", background: "rgba(255,255,255,0.12)", color: "#fff", boxSizing: "border-box" }} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ width: "100%", padding: "28px 16px 52px" }}>
+        {filtered.length > 0
+          ? <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
+              {filtered.map(a => <AreaBox key={a.id} area={a} />)}
+            </div>
+          : <div style={{ textAlign: "center", padding: "60px", color: "#bbb", fontStyle: "italic" }}>Sin resultados.</div>
+        }
+      </div>
+
+      <div style={{ borderTop: "1px solid rgba(0,0,0,0.06)", padding: "20px 16px", background: "#fff" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+          <span style={{ fontSize: 11, color: "#bbb" }}>Aguad Bañados Izquierdo Abogados · Joaquín Montero 3000, of. 701, Vitacura</span>
+          <span style={{ fontSize: 10, color: "#ccc" }}>Desarrollado por <strong style={{ color: "#aaa" }}>Tomás Sánchez E.</strong> · Claude by Anthropic</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  const [user, setUser] = useState(null);
+  if (!user) return <Login onLogin={setUser} />;
+  return <Portal user={user} onLogout={() => setUser(null)} />;
+}
